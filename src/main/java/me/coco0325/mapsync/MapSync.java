@@ -34,6 +34,8 @@ public final class MapSync extends JavaPlugin{
     public GriefPreventionHook griefPreventionHook = null;
     public String servername;
     public boolean copyright;
+    public boolean isPaperCB = false;
+    public boolean needMapId = false;
     public static MapSync instance;
     public String colors_field, getMapFunctionName; // For reflection
 
@@ -58,13 +60,23 @@ public final class MapSync extends JavaPlugin{
         if(Bukkit.getVersion().contains("1.16")){
             getMapFunctionName = "a";
             colors_field = "colors";
-        }else if(Bukkit.getVersion().contains("1.17") || Bukkit.getVersion().contains("1.18") || Bukkit.getVersion().contains("1.19") || Bukkit.getVersion().contains("1.20")){
+        }else if(Bukkit.getVersion().contains("1.17") || Bukkit.getVersion().contains("1.18") || Bukkit.getVersion().contains("1.19") || Bukkit.getVersion().contains("1.20") || Bukkit.getVersion().contains("1.21")){
             getMapFunctionName = "a";
             colors_field = "g";
             Bukkit.getPluginManager().registerEvents(new MapRenderListener_1_17(this), this);
         }else{
-            this.getLogger().log(Level.SEVERE, "Wrong Minecraft Version! Now only support 1.16 to 1.20");
+            this.getLogger().log(Level.SEVERE, "Wrong Minecraft Version! Now only support 1.16 to 1.21");
             this.getPluginLoader().disablePlugin(this);
+        }
+
+        if(Bukkit.getVersion().contains("1.20.5") || Bukkit.getVersion().contains("1.20.6") || Bukkit.getVersion().contains("1.21")){
+            needMapId = true;
+            try {
+                // Check if using Paper
+                Class.forName("com.destroystokyo.paper.ParticleBuilder");
+                isPaperCB = true;
+            } catch (ClassNotFoundException ignored) {
+            }
         }
 
         try{

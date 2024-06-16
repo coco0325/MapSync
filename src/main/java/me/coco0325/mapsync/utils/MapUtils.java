@@ -146,13 +146,25 @@ public class MapUtils {
         String s = "map_" + view.getId();
         Object craftworld = getCBTClass().cast(Bukkit.getServer().getWorlds().get(0));
         Object world = craftworld.getClass().getMethod("getHandle").invoke(craftworld);
-        Object worldmap = world.getClass().getDeclaredMethod(plugin.getMapFunctionName, String.class).invoke(world, s);
+        Object worldmap;
+        if(plugin.needMapId){
+            Class<?> MapIdClass = Class.forName("net.minecraft.world.level.saveddata.maps.MapId");
+            Object mapId = MapIdClass.getConstructor(int.class).newInstance(view.getId());
+            worldmap = world.getClass().getDeclaredMethod(plugin.getMapFunctionName, MapIdClass).invoke(world, mapId);
+        }else{
+            worldmap = world.getClass().getDeclaredMethod(plugin.getMapFunctionName, String.class).invoke(world, s);
+        }
         return (byte[]) worldmap.getClass().getDeclaredField(plugin.colors_field).get(worldmap);
     }
 
     private static Class<?> getCBTClass() throws ClassNotFoundException {
-        String version = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3] + ".";
-        String name = "org.bukkit.craftbukkit." + version + "CraftWorld";
+        String name;
+        if(plugin.isPaperCB) {
+            name = "org.bukkit.craftbukkit.CraftWorld";
+        }else{
+            String  version = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3] + ".";
+            name = "org.bukkit.craftbukkit." + version + "CraftWorld";
+        }
         return Class.forName(name);
     }
 
